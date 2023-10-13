@@ -1,0 +1,187 @@
+---
+title: "The Theil Index"
+output:
+  html_document:
+    df_print: paged
+author: Grace Acton
+---
+
+```{r include=FALSE}
+library(tidyverse)
+```
+
+# Code Answer Key
+
+The data for this assignment come from the [World Bank Databank](https://databank.worldbank.org/source/world-development-indicators#). 
+
+## Part 1: Data Import and Preparation
+
+
+```{r}
+data <- read.csv("World_Data_2020.csv")
+```
+
+```{r}
+
+data$population <- data$Population..total..SP.POP.TOTL. # The population column
+data$GDP <- data$GDP..current.US....NY.GDP.MKTP.CD.# The GDP column
+
+```
+
+## Part 2: Subgroups determined by total GDP
+
+```{r}
+# Setting up the theil_one dataframe 
+theil_one <- data.frame(matrix(nrow = nrow(data), ncol = 0)) # creating a new dataframe
+theil_one$country <- data$Country.Name # adding the country column
+theil_one$population <- as.numeric(data$population) # adding the population column
+theil_one$GDP <- as.numeric(data$GDP) # adding the GDP column
+
+# the next lines remove all rows with an NA value for GDP
+theil_one <- theil_one %>%
+  filter(is.na(GDP) == FALSE)
+```
+
+
+```{r}
+median_GDP <- median(theil_one$GDP, na.rm = TRUE) # Your code here!
+median_GDP # View the median
+```
+
+
+```{r}
+# Fill in the blanks!
+for(i in 1:nrow(theil_one)){
+  if(theil_one$GDP[i] >= median_GDP){
+    theil_one$group[i] <- "rich"
+  } else if(theil_one$GDP[i] < median_GDP){
+    theil_one$group[i] <- "poor"
+  }
+}
+```
+
+
+```{r}
+total_population <- sum(theil_one$population)
+total_GDP <- sum(theil_one$GDP)
+total_population
+total_GDP
+```
+
+
+```{r}
+theil_rich <- theil_one %>% 
+  filter(group == "rich")
+
+theil_poor <- theil_one %>% 
+  filter(group == "poor")
+```
+
+
+```{r}
+population_rich <- sum(theil_rich$population)
+GDP_rich <- sum(theil_rich$GDP)
+
+population_poor <- sum(theil_poor$population)
+GDP_poor <- sum(theil_poor$GDP)
+```
+
+
+```{r}
+population_proportion_rich <- population_rich / total_population
+GDP_proportion_rich <- GDP_rich / total_GDP
+
+population_proportion_poor <- population_poor / total_population
+GDP_proportion_poor <- GDP_poor / total_GDP
+```
+
+
+```{r}
+theil_index <- GDP_proportion_poor*log(GDP_proportion_poor/population_proportion_poor) + 
+                GDP_proportion_rich*log(GDP_proportion_rich/population_proportion_rich)
+```
+
+The Theil Index, separating the countries into two subgroups by total GDP, is `r theil_index`. 
+
+
+## Part 3: Subgroups determined by GDP per Capita
+
+
+```{r}
+# Setting up the theil_two dataframe 
+theil_two <- data.frame(matrix(nrow = nrow(data), ncol = 0)) # creating a new dataframe
+theil_two$country <- data$Country.Name # adding the country column
+theil_two$population <- as.numeric(data$population) # adding the population column
+theil_two$GDP <- as.numeric(data$GDP) # adding the GDP column
+theil_two$GDP_per_capita <- as.numeric(data$GDP.per.capita..current.US....NY.GDP.PCAP.CD.)
+
+# the next lines remove all rows with an NA value for GDP
+theil_two <- theil_two %>%
+  filter(is.na(GDP) == FALSE) %>% 
+  filter(is.na(GDP_per_capita) == FALSE)
+```
+
+
+```{r}
+median_GDP_pc <- median(theil_two$GDP_per_capita, na.rm = TRUE) # Your code here!
+median_GDP_pc # View the median
+```
+
+
+```{r}
+# Fill in the blanks!
+for(i in 1:nrow(theil_two)){
+  if(theil_two$GDP_per_capita[i] >= median_GDP_pc){
+    theil_two$group[i] <- "rich"
+  } else if(theil_two$GDP_per_capita[i] < median_GDP_pc){
+    theil_two$group[i] <- "poor"
+  }
+}
+```
+
+
+```{r}
+total_population <- sum(theil_two$population)
+total_GDP <- sum(theil_two$GDP)
+total_population
+total_GDP
+```
+
+
+```{r}
+theil_rich <- theil_two %>% 
+  filter(group == "rich")
+
+theil_poor <- theil_two %>% 
+  filter(group == "poor")
+```
+
+
+```{r}
+population_rich <- sum(theil_rich$population)
+GDP_rich <- sum(theil_rich$GDP)
+
+population_poor <- sum(theil_poor$population)
+GDP_poor <- sum(theil_poor$GDP)
+```
+
+
+```{r}
+population_proportion_rich <- population_rich / total_population
+GDP_proportion_rich <- GDP_rich / total_GDP
+
+population_proportion_poor <- population_poor / total_population
+GDP_proportion_poor <- GDP_poor / total_GDP
+```
+
+
+```{r}
+theil_index_two <- GDP_proportion_poor*log(GDP_proportion_poor/population_proportion_poor) + 
+                GDP_proportion_rich*log(GDP_proportion_rich/population_proportion_rich)
+```
+
+This time, the Theil Index came out to `r theil_index_two`. 
+
+
+
+

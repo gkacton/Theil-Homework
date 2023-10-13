@@ -1,0 +1,240 @@
+---
+title: "The Theil Index"
+output:
+  html_document:
+    df_print: paged
+---
+
+This RMarkdown Notebook will walk you through the steps of calculating the Theil Index, a measure of economic inequality. The formula for calculating the Theil Index with two variables is as follows:
+
+$$ 
+T = income.proportion(poor) \bullet ln(\dfrac{income.proportion(poor)}{population.portion(poor}) + income.proportion(rich) \bullet ln(\dfrac{income.proportion(rich)}{population.proportion(rich)})
+$$ 
+
+The Theil Index can also be calculated using more than two subgroups. 
+
+### About this assignment
+
+The data for this assignment come from the [World Bank Databank](https://databank.worldbank.org/source/world-development-indicators#). This assignment will use some functions from the `tidyverse` [package](https://www.tidyverse.org/). 
+
+When working through this fill-in-the-blank coding exercise, remember to comment your code! It is recommended that you run code chunks as you go. When you're finished, knit the document. 
+
+```{r load-packages, include=FALSE}
+library(tidyverse)
+```
+
+## Part 1: Data Import and Preparation
+
+Fill in the blank in code block below to import the data and save it as a dataframe called `data`. 
+```{r data-import}
+
+data <- read.csv(____) 
+```
+
+View the `data`. The column names given from the World Bank Databank are long and unweildy! Complete the code below to define new columns with shorter, descriptive names.
+
+```{r column-names}
+# Give your columns names that are both descriptive and short! 
+# If you're using multiple words, be consistent with your use of either camelCase or snake_case.
+
+data$______ <- data$Population..total..SP.POP.TOTL. # The population column
+data$______ <- data$GDP..current.US....NY.GDP.MKTP.CD.# The GDP column
+
+```
+
+## Part 2: Subgroups defined by Total GDP
+
+The first Theil Index we will calculate will compare the economic inequality between the richest half of countries and the poorest half of countries, determined by total GDP.
+
+To calculate the Theil Index using two subgroups, we should first set up a new dataframe. We will call it `theil_one`.
+
+```{r theil-one-setup}
+# Setting up the theil_one dataframe 
+theil_one <- data.frame(matrix(nrow = nrow(data), ncol = 0)) # creating a new dataframe
+
+# Add columns from the old dataframe
+theil_one$country <- data$Country.Name # add the country column
+theil_one$population <- as.numeric(data$_____) # add the population column
+theil_one$GDP <- as.numeric(data$_____) # add the GDP column
+
+```
+
+The World Bank is missing GDP data for some countries; these NA values will prevent R from making calculations, so we need to remove them. **Use the `filter()` function from the `tidyverse` package to remove all rows with NA values for GDP.**
+``` {r theil-one-filter}
+# the next lines remove all rows with an NA value for GDP
+theil_one <- theil_one %>%
+  filter(____)
+```
+
+Now, we need to define the two groups. First, determine the median GDP of all the countries. Save it as a variable called `median_GDP`. 
+
+```{r median-GDP-one}
+median_GDP <- median(______)
+median_GDP # View the median
+```
+
+Next, we need to determine if each country's GDP is above (or equal) to the median, or below the median. We'll create a new column called `group`, and fill it in with "rich" if the GDP is greater than or equal to the median GDP, or "poor" if the country's GDP is below the median. **Fill in the blanks in the code below to write a for-loop that will iterate through each country and make this determination.**
+
+```{r for-loop}
+# Fill in the blanks!
+for(i in _______){
+  if(theil_one$GDP[i] >= median_GDP){
+    theil_one$group[i] <- ______
+  } else if(theil_one$GDP[i] < median_GDP){
+    theil_one$group[i] <- ______
+  }
+}
+```
+
+Next, we need to calculate two values for all of the countries combined: total population, and total GDP. **Use the funtion `sum` to add all of the values in each relevant column.**
+
+```{r totals-one}
+total_population <- sum(______)
+total_GDP <- sum(_____)
+
+# View values
+total_population
+total_GDP
+```
+
+We can now separate our two groups into different dataframes to make calculations easier. **Use the `tidyverse::filter()` function again.**
+
+```{r group-filter-one}
+theil_rich <- theil_one %>% 
+  filter(group == _____)
+
+theil_poor <- theil_one %>% 
+  filter(group == _____)
+```
+
+Now, we need to calculate the proportions of GDP and population held by the rich half and poor half. First, we'll need to know the totals for each of these variables for each group. **Use the `sum()` function again.**
+
+```{r group-totals-one}
+population_rich <- sum(_____)
+GDP_rich <- sum(____)
+
+population_poor <- sum(______)
+GDP_poor <- sum(______)
+```
+
+Now, divide these values by the total values calculated earlier to determine the proportion of population and GDP held by each group. **Remember that the total population and total GDP values are stored as variables.**
+
+```{r group-proportions-one}
+population_proportion_rich <- ____________
+GDP_proportion_rich <- __________
+
+population_proportion_poor <- _____________
+GDP_proportion_poor <- _____________
+```
+
+Finally, fill in the blanks to calculate the Theil Index.
+
+```{r theil-one}
+theil_index <- GDP_proportion_poor*log(_________/_________) + 
+                GDP_proportion_rich*log(_________/__________)
+```
+
+The Theil Index, separating the countries into two subgroups by total GDP, is `r theil_index`. 
+
+**What does this number mean in context?**
+
+**Look at the `theil_one` dataframe and sort by GDP. What do you notice about the low GDP countries?**
+
+
+## Part 3: Subgroups determined by GDP per Capita
+
+**What happens if the "rich" and "poor" countries are determined by GDP per Capita, rather than total GDP?**
+
+Repeat the process from above, this time using GDP per Capita to define the groups.
+
+```{r theil-two-setup}
+# Setting up the theil_two dataframe 
+theil_two <- data.frame(matrix(nrow = nrow(data), ncol = 0)) # creating a new dataframe
+
+# Add columns from the original dataframe
+theil_two$country <- data$Country.Name # adding the country column
+theil_two$population <- as.numeric(data$_____) # adding the population column
+theil_two$GDP <- as.numeric(_____) # adding the GDP column
+theil_two$GDP_per_capita <- as.numeric(data$GDP.per.capita..current.US....NY.GDP.PCAP.CD.) # adding GDP per capita
+
+# Use the filter function to remove all rows with an NA for both GDP and GDP per capita
+theil_two <- theil_two %>%
+  filter(_____) %>%  # remove NAs for GDP
+  filter(______) # remove NAs for GDP per capita
+```
+
+Now, determine the median GDP *per capita* of all the countries. Save it as a variable called `median_GDP_pc`. 
+
+```{r median-GDP-per-capita}
+median_GDP_pc <- _____________ # Your code here!
+median_GDP_pc # View the median
+```
+
+Next, we'll use a for-loop again to iterate through each country and determine if its GDP per capita is above (or equal) to the median, or below the median. The new column `group` will contain "rich" if the GDP per capita is greater than or equal to the median GDP per capita, or "poor" if the country's GDP per capita is below the median. 
+
+```{r for-loop-two}
+# Fill in the blanks!
+for(i in _______){
+  if(theil_two$GDP_per_capita[i] >= ________){
+    theil_two$group[i] <- "rich"
+  } else if(theil_two$GDP_per_capita[i] < _________){
+    theil_two$group[i] <- "poor"
+  }
+}
+```
+
+Next, we need to calculate total population and total GDP again. 
+
+```{r totals-two}
+total_population <- __________
+total_GDP <- ___________
+total_population
+total_GDP
+```
+
+Now create the "rich" and "poor" dataframes again, using the `tidyverse::filter()` function. 
+```{r group-filter-two}
+theil_rich <- theil_two %>% 
+  filter(_______)
+
+theil_poor <- theil_two %>% 
+  filter(_______)
+```
+
+Calculate the total population and GDP of each group again. 
+
+```{r group-totals-two}
+population_rich <- ___________
+GDP_rich <- _________
+
+population_poor <- __________
+GDP_poor <- ___________
+```
+
+And divide these values by the totals in order to calculate the proportion values for these new groupings.
+
+```{r group-proportions-two}
+population_proportion_rich <- ____________
+GDP_proportion_rich <- __________
+
+population_proportion_poor <- __________
+GDP_proportion_poor <- __________
+```
+
+Finally, we can calculate the Theil Index again.
+
+```{r theil-two}
+theil_index_two <- GDP_proportion_poor*log(________/__________) + 
+                GDP_proportion_rich*log(________/_________)
+```
+
+This time, the Theil Index came out to `r theil_index_two`. 
+
+### Questions
+
+**What changed? Why is the Theil Index so different this time?**
+
+**Is it more representative of the true state of economic inequality to separate countries by their total GDP or their GDP per capita? Why?**
+
+**What other methods could you use to group the countries? How might that change the Theil Index?**
+
