@@ -5,13 +5,18 @@ output:
     df_print: paged
 ---
 
-This RMarkdown Notebook will walk you through the steps of calculating the Theil Index, a measure of economic inequality. The formula for calculating the Theil Index with two variables is as follows:
+This RMarkdown document will walk you through the steps of calculating the Theil Index, a measure of economic inequality. 
+
+The Theil Index, unlike the Gini Index, has the property of *subgroup decomposability*. This means that the population can be divided into any number of subgroups, the contribution for each subgroup is computed individually, and the Index will be the sum of all groups' contributions. Groups can also be defined based on different criteria: urban vs rural, rich vs poor, and racial groups are all potentials for analysis. 
+
+For the purposes of this assignment, we will examine data from the World Bank on 217 countries. We will use two subgroups at a time to calculate the Theil Index, and see how the Index changes depending on how those groups are defined. 
+
+The formula for calculating the Theil Index with two variables is as follows:
 
 $$ 
 T = income.proportion(poor) \bullet ln(\dfrac{income.proportion(poor)}{population.portion(poor}) + income.proportion(rich) \bullet ln(\dfrac{income.proportion(rich)}{population.proportion(rich)})
 $$ 
 
-The Theil Index can also be calculated using more than two subgroups. 
 
 ### About this assignment
 
@@ -237,4 +242,6 @@ This time, the Theil Index came out to `r theil_index_two`.
 **Is it more representative of the true state of economic inequality to separate countries by their total GDP or their GDP per capita? Why?**
 
 **What other methods could you use to group the countries? How might that change the Theil Index?**
+
+**How might the Theil Index be used to influence public perception of inequality? How does changing the definition of subgroups change how the Theil Index can be used?** 
 
